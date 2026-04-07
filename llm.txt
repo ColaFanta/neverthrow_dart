@@ -1,0 +1,122 @@
+# neverthrow_dart
+
+neverthrow_dart is a Dart 3 package for explicit, composable error handling.
+
+It solves three common problems:
+- representing success or failure without relying on thrown exceptions for expected control flow
+- representing optional values without using nullable types everywhere
+- composing synchronous and asynchronous fallible operations with the same mental model
+
+Use this package when you want failure and absence to be visible in function signatures.
+
+## Core concepts
+
+### Result<T>
+Use `Result<T>` when an operation can succeed with a value or fail with an `Exception`.
+
+- `Result.ok(value)` creates success
+- `Result.err(error, [stackTrace])` creates failure
+- `Result.of(fn)` runs synchronous code and captures thrown values
+- `Result.async(fn)` runs asynchronous code and captures thrown values
+- `map`, `flatMap`, `mapErr`, `catchCase`, and `catchAll` transform or recover
+- `or`, `orElse`, and `orThrow` unwrap with fallback behavior
+
+Example:
+
+```dart
+Result<int> parsePort(String raw) {
+  return Result.of(() => int.parse(raw))
+      .catchCase<FormatException>((_, __) => Result.err(Exception('Invalid port')));
+}
+```
+
+### Option<T>
+Use `Option<T>` when a value may be present or absent and `null` is not the API you want to expose.
+
+- `Option.some(value)` creates presence
+- `Option.none()` creates absence
+- `Option.fromNullable(value)` converts nullable values
+- `map`, `flatMap`, `flatMapNullable`, and `alt` compose optional logic
+- `or`, `orElse`, and `orThrow` unwrap with fallback behavior
+
+Example:
+
+```dart
+Option<String> displayName(String? nickname, String name) {
+  return Option.fromNullable(nickname)
+      .map((value) => value.trim())
+      .flatMapNullable((value) => value.isEmpty ? null : value)
+      .alt(() => Option.some(name));
+}
+```
+
+### FutureResult<T>
+`FutureResult<T>` is a type alias for `Future<Result<T>>`.
+
+Use the async extension methods to work with asynchronous results in the same style as `Result<T>`.
+
+- `map`, `flatMap`, `mapErr`, `catchCase`, and `catchAll` are available on `FutureResult<T>`
+- `Result.async` and `$doAsync` are the main entry points for async workflows
+
+Example:
+
+```dart
+FutureResult<User> loadUser(Api api, String id) {
+  return Result.async(() => api.fetchUser(id))
+      .flatMap((json) => Result.of(() => User.fromJson(json)));
+}
+```
+
+### $do and $doAsync
+Use `$do` and `$doAsync` when you want to write composition in direct style instead of nesting `flatMap` calls.
+
+Inside these blocks, `. $` on `Result`, `Option`, or `FutureResult` unwraps the success path and short-circuits on failure.
+
+Example:
+
+```dart
+Result<String> buildLabel(Map<String, dynamic> env) {
+  return $do(() {
+    final service = Result<String>.cast(env['SERVICE_NAME']).$.trim();
+    final rawPort = Result<String>.cast(env['PORT']).$;
+    final port = Result.of(() => int.parse(rawPort)).$;
+    return '$service:$port';
+  });
+}
+```
+
+## How to use this package
+
+Import the package barrel:
+
+```dart
+import 'package:neverthrow_dart/neverthrow_dart.dart';
+```
+
+Design guidance:
+- return `Result<T>` for fallible operations
+- return `Option<T>` for absent-or-present values
+- use `Result.of` and `Result.async` at exception boundaries
+- use `map` and `flatMap` for transformation and composition
+- use `tap` and `tapErr` for side effects like logging
+- use `orThrow` only at boundaries where exceptions are still the right interface
+
+## Error model
+
+This package uses `Result<T>`, not `Result<T, E>`.
+
+Failures are stored as `Exception` plus optional `StackTrace`. Non-`Exception` thrown objects are wrapped in package-defined exceptions such as `NeverThrowUnknownException`. Stack traces are preserved so `orThrow` can rethrow with the original trace.
+
+## Public API summary
+
+- `Result<T>`: success or failure value
+- `Option<T>`: present or absent value
+- `FutureResult<T>`: `Future<Result<T>>`
+- `$do`, `$doAsync`: direct-style composition helpers
+- `NeverThrowException` variants: package exceptions used for bubbling, cast failure, unknown thrown values, and empty access
+
+If you are generating code, prefer these patterns:
+- model expected failure with `Result<T>` instead of broad `try`/`catch`
+- convert nullable inputs with `Option.fromNullable`
+- compose multiple fallible steps with `flatMap` or `$do`
+- preserve package-level imports through `package:neverthrow_dart/neverthrow_dart.dart`
