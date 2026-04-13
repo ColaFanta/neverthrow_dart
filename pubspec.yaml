@@ -1,7 +1,14 @@
 name: neverthrow_dart
-description: Brings better error handling to Dart, with Result, Option, FutureResult, and do-style composition.
-version: 1.0.0
+description: Result and Option for Dart, with addition of FutureResult and do-notation. Inspired by fp_dart, dartz, and neverthrow for TypeScript.
+version: 1.0.1
+homepage: https://github.com/ColaFanta/neverthrow_dart
 repository: https://github.com/ColaFanta/neverthrow_dart
+topics:
+  - result
+  - option
+  - error-handling
+  - functional-programming
+  - monad
 
 environment:
   sdk: ^3.5.0

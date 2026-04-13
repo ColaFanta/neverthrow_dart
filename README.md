@@ -1,5 +1,10 @@
 # neverthrow_dart
 
+[![pub package](https://img.shields.io/pub/v/neverthrow_dart.svg)](https://pub.dev/packages/neverthrow_dart)
+[![pub likes](https://img.shields.io/pub/likes/neverthrow_dart)](https://pub.dev/packages/neverthrow_dart/score)
+[![pub points](https://img.shields.io/pub/points/neverthrow_dart)](https://pub.dev/packages/neverthrow_dart/score)
+[![license](https://img.shields.io/github/license/ColaFanta/neverthrow_dart)](https://github.com/ColaFanta/neverthrow_dart/blob/main/LICENSE)
+
 Brings better error handling to Dart, with `Result`, `Option`, `FutureResult`, and `do`-style composition.
 
 ## Introduction
@@ -16,13 +21,26 @@ The goal is not to ban `throw`. It is to make expected failure visible in the ty
 
 ### Installation
 
+CLI:
+
 ```bash
 dart pub add neverthrow_dart
 ```
-or for `flutter` project
+
+For Flutter:
+
 ```bash
 flutter pub add neverthrow_dart
 ```
+
+Manual `pubspec.yaml`:
+
+```yaml
+dependencies:
+  neverthrow_dart: ^<latest version>
+```
+
+Latest version: [![pub package](https://img.shields.io/pub/v/neverthrow_dart.svg?label=pub.dev)](https://pub.dev/packages/neverthrow_dart)
 
 ### About this project
 
